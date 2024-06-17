@@ -199,12 +199,12 @@ fn send_withdraw_amm_pool_tx() -> Result<()> {
 
 fn send_swap_tx() -> Result<()> {
     // config params
-    let wallet_file_path = "id.json";
-    let cluster_url = "https://api.devnet.solana.com/";
-    let amm_program = Pubkey::from_str("HWy1jotHpo6UqeQxx49dpYYdQB8wj9Qk9MdxwjLvDHB8")?;
-    let amm_pool_id = Pubkey::from_str("BbZjQanvSaE9me4adAitmTTaSgASvzaVignt4HRSM7ww")?;
-    let input_token_mint = Pubkey::from_str("GfmdKWR1KrttDsQkJfwtXovZw9bUBHYkPAEwB6wZqQvJ")?;
-    let output_token_mint = Pubkey::from_str("2SiSpNowr7zUv5ZJHuzHszskQNaskWsNukhivCtuVLHo")?;
+    let wallet_file_path = "wallet.json";
+    let cluster_url = "https://api.mainnet-beta.solana.com";
+    let amm_program = Pubkey::from_str("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8")?;
+    let amm_pool_id = Pubkey::from_str("EszkFjSxSoP5emyno8y7pNYeFGoEuEct4CP1iFQxVnn5")?;
+    let input_token_mint = Pubkey::from_str("8JqTaQzLX4422EA7ZHqcJ2bxGzw7n6F8UzCqTqNU5Chi")?;
+    let output_token_mint = Pubkey::from_str("FiyRSa4VhMTwiYd4w9wdJzgCxkfKoUMYo7SCYt4oczNS")?;
     let slippage_bps = 50u64; // 0.5%
     let amount_specified = 2000_000000u64;
     let swap_base_in = false;
@@ -215,12 +215,14 @@ fn send_swap_tx() -> Result<()> {
 
     // load amm keys
     let amm_keys = raydium_library::amm::utils::load_amm_keys(&client, &amm_program, &amm_pool_id)?;
+    println!("amm_keys:{:#?}", amm_keys);
     // load market keys
     let market_keys = raydium_library::amm::openbook::get_keys_for_market(
         &client,
         &amm_keys.market_program,
         &amm_keys.market,
     )?;
+    println!("market_keys:{:#?}", market_keys);
     // calculate amm pool vault with load data at the same time or use simulate to calculate
     let result = raydium_library::amm::calculate_pool_vault_amounts(
         &client,
@@ -230,6 +232,7 @@ fn send_swap_tx() -> Result<()> {
         &market_keys,
         amm::utils::CalculateMethod::Simulate(wallet.pubkey()),
     )?;
+    println!("result:{:#?}", result);
     let direction = if input_token_mint == amm_keys.amm_coin_mint
         && output_token_mint == amm_keys.amm_pc_mint
     {
